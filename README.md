@@ -1,5 +1,10 @@
-### 环境
-可部署于 Centos6+，Centos7+，Debian9，Ubuntu14+
+### 适用环境
+Centos6+
+
+Debian8+
+
+Ubuntu14+
+
 
 ### 功能
 1. 安装shadowsocksr服务端
@@ -35,6 +40,8 @@ SSR安装目录`/usr/local/shadowsocksr`
 ssrpanel-v2ray安装目录`/usr/local/ssrpanel-v2ray`
 
 v2ray安装目录`/usr/local/v2ray-linux-64`
+
+安装的版本均是最新版本
 
 
 ### 查看shadowsocksr服务
