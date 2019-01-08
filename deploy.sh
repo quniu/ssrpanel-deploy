@@ -27,7 +27,6 @@ shadowsocksr_service_apt="https://raw.githubusercontent.com/quniu/ssrpanel-deplo
 
 # v2ray
 ssrpanel_v2ray_name="ssrpanel-v2ray"
-v2ray_core_name="v2ray-linux-64"
 v2ray_init_name="v2ray"
 v2ray_service_yum="https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/service/${v2ray_init_name}"
 v2ray_service_apt="https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/service/${v2ray_init_name}-debian"
@@ -109,6 +108,18 @@ auto
 none
 aes-128-gcm
 chacha20-poly1305
+)
+
+# v2ray system
+v2ray_system=(
+linux
+windows
+)
+
+# v2ray arch
+v2ray_arch=(
+32
+64
 )
 
 # Color
@@ -462,7 +473,7 @@ config_userjson(){
     "timeout":120,
     "udp_timeout": 60,
     "dns_ipv6": false,
-    "redirect": ["www.amazon.com", "images-na.ssl-images-amazon.com", "m.media-amazon.com", "kdp.amazon.com", "php.net"],
+    "redirect": ["www.baidu.com", "image.baidu.com", "m.baidu.com", "map.baidu.com", "zhidao.baidu.com"],
     "fast_open":false
 }
 EOF
@@ -898,29 +909,57 @@ v2ray_install_prepare(){
     echo -e "[${red}Error${plain}] Please enter a correct number [1-65535]"
     done
 
-    # Set v2ray ciphers
+    # Set v2ray system
     while true
     do
-    echo -e "Please select ciphers for v2ray:"
-    for ((i=1;i<=${#v2ray_ciphers[@]};i++ )); do
-        hint="${v2ray_ciphers[$i-1]}"
+    echo -e "Please select system for v2ray:"
+    for ((i=1;i<=${#v2ray_system[@]};i++ )); do
+        hint="${v2ray_system[$i-1]}"
         echo -e "${green}${i}${plain}) ${hint}"
     done
-    read -p "Which interface you'd select(Default: ${v2ray_ciphers[0]}):" encty
-    [ -z "$encty" ] && encty=1
-    expr ${encty} + 1 &>/dev/null
+    read -p "Which system you'd select(Default: ${v2ray_system[0]}):" v2sys
+    [ -z "$v2sys" ] && v2sys=1
+    expr ${v2sys} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
         echo -e "[${red}Error${plain}] Input error, please input a number"
         continue
     fi
-    if [[ "$encty" -lt 1 || "$encty" -gt ${#v2ray_ciphers[@]} ]]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#v2ray_ciphers[@]}"
+    if [[ "$v2sys" -lt 1 || "$v2sys" -gt ${#v2ray_system[@]} ]]; then
+        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#v2ray_system[@]}"
         continue
     fi
-    v2ray_encryption=${v2ray_ciphers[$encty-1]}
+    v2ray_sys=${v2ray_system[$v2sys-1]}
     echo
     echo "---------------------------"
-    echo "v2ray encryption = ${v2ray_encryption}"
+    echo "v2ray system = ${v2ray_sys}"
+    echo "---------------------------"
+    echo
+    break
+    done
+
+    # Set v2ray system arch
+    while true
+    do
+    echo -e "Please select system arch for v2ray:"
+    for ((i=1;i<=${#v2ray_arch[@]};i++ )); do
+        hint="${v2ray_arch[$i-1]}"
+        echo -e "${green}${i}${plain}) ${hint}"
+    done
+    read -p "Which interface you'd select(Default: ${v2ray_arch[1]}):" v2arch
+    [ -z "$v2arch" ] && v2arch=2
+    expr ${v2arch} + 1 &>/dev/null
+    if [ $? -ne 0 ]; then
+        echo -e "[${red}Error${plain}] Input error, please input a number"
+        continue
+    fi
+    if [[ "$v2arch" -lt 1 || "$v2arch" -gt ${#v2ray_arch[@]} ]]; then
+        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#v2ray_arch[@]}"
+        continue
+    fi
+    v2ray_arc=${v2ray_arch[$v2arch-1]}
+    echo
+    echo "---------------------------"
+    echo "v2ray system arch = ${v2ray_arc}"
     echo "---------------------------"
     echo
     break
@@ -1009,16 +1048,6 @@ v2ray_download_files(){
     else
         echo -e "[${green}Info${plain}] ssrpanel-v2ray already installed."
         exit 1
-    fi  
-
-    if [ ! -d "/usr/local/${v2ray_core_name}" ]; then
-        get_v2ray_core_ver
-        v2ray_core_file="v2ray-linux-64"
-        v2ray_core_url="https://github.com/v2ray/v2ray-core/releases/download/${v2ray_core_ver}/${v2ray_core_file}.zip"
-        download "${v2ray_core_file}.zip" "${v2ray_core_url}"
-    else
-        echo -e "[${green}Info${plain}] v2ray-core already installed."
-        exit 1
     fi 
 
     if check_sys packageManager yum; then
@@ -1033,42 +1062,25 @@ config_ssrpanel_v2ray(){
     cat > /usr/local/${ssrpanel_v2ray_name}/config.properties<<-EOF
 ############################## V2ray配置 ##############################
 
-# v2ray路径
-v2ray.path=/usr/local/${v2ray_core_name}
-
-# 可执行文件名
-v2ray.exec=v2ray
-
-# GRPC设置
-v2ray.grpc.address=127.0.0.1
-v2ray.grpc.port=${v2ray_grpc_port}
-
+# 操作系统(windows,linux)
+v2ray.system=${v2ray_sys}
+# 系统位数(32,64)
+v2ray.arch=${v2ray_arc}
 # 协议标签
 v2ray.tag=proxy
-
-# 加密方式 可选值(aes-128-gcm, chacha20-poly1305, none, auto)
-v2ray.security=${v2ray_encryption}
-
 # 额外ID
 v2ray.alter-id=${v2ray_mysql_alter_id}
-
 # 用户等级
 v2ray.level=1
-
-
 
 ############################## 节点配置 ##############################
 
 # 节点ID
 node.id=${v2ray_mysql_nodeid}
-
 # 检查时间(秒)
 node.check-rate=60
-
 # 流量比例
 node.traffic-rate=${v2ray_mysql_ratio}
-
-
 
 ############################## 数据库配置 ##############################
 
@@ -1083,28 +1095,23 @@ EOF
 
 # Config v2ray config.json
 config_v2ray(){
-    cat > /usr/local/${v2ray_core_name}/config.json<<-EOF
+    cat > /usr/local/${ssrpanel_v2ray_name}/config.json<<-EOF
 {
+  "log": {
+    "access": "./access.log",
+    "error": "./error.log",
+    "loglevel": "debug"
+  },
   "api": {
+    "tag": "api",
     "services": [
       "HandlerService",
+      "LoggerService",
       "StatsService"
-    ],
-    "tag": "api"
+    ]
   },
   "stats": {},
-  "inbound": {
-    "port": ${v2ray_vmess_port},
-    "protocol": "vmess",
-    "settings": {
-      "clients": []
-    },
-    "streamSettings": {
-      "network": "tcp"
-    },
-    "tag": "proxy"
-  },
-  "inboundDetour": [
+  "inbounds": [
     {
       "listen": "0.0.0.0",
       "port": ${v2ray_grpc_port},
@@ -1113,17 +1120,26 @@ config_v2ray(){
         "address": "0.0.0.0"
       },
       "tag": "api"
+    },
+    {
+      "tag": "proxy",
+      "listen": "0.0.0.0",
+      "port": ${v2ray_vmess_port},
+      "protocol": "vmess",
+      "settings": {
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "tcp"
+      }
     }
   ],
-  "log": {
-    "access": "./access.log",
-    "error": "./error.log",
-    "loglevel": "debug"
-  },
-  "outbound": {
-    "protocol": "freedom",
-    "settings": {}
-  },
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ],
   "routing": {
     "settings": {
       "rules": [
@@ -1153,14 +1169,12 @@ EOF
 # Deploy v2ray
 v2ray_deploy(){
     unzip ${ssrpanel_v2ray_file}.zip -d /usr/local/${ssrpanel_v2ray_name}
-    unzip ${v2ray_core_file}.zip -d /usr/local/${v2ray_core_name}
-    mv /usr/local/${ssrpanel_v2ray_name}/${ssrpanel_v2ray_file}.jar /usr/local/${ssrpanel_v2ray_name}/${ssrpanel_v2ray_name}.jar
+    mv /usr/local/${ssrpanel_v2ray_name}/ssrpanel-v2ray-${ssrpanel_v2ray_ver}-jar-with-dependencies.jar /usr/local/${ssrpanel_v2ray_name}/${ssrpanel_v2ray_name}.jar
+    rm -rf /usr/local/${ssrpanel_v2ray_name}/config.properties
     config_ssrpanel_v2ray
-    config_v2ray
     rm -rf /usr/local/${ssrpanel_v2ray_name}/config.json
-    cp -rf /usr/local/${v2ray_core_name}/config.json /usr/local/${ssrpanel_v2ray_name}
+    config_v2ray
     chmod -R a+x /usr/local/${ssrpanel_v2ray_name}
-    chmod -R a+x /usr/local/${v2ray_core_name}
 }
 
 # Start v2ray service
@@ -1188,7 +1202,8 @@ v2ray_start_service(){
                 echo -e "Your Server IP        : $(get_ip)                  "
                 echo -e "Your V2ray Grpc Port  : ${v2ray_grpc_port}         "
                 echo -e "Your V2ray Vmess Port : ${v2ray_vmess_port}        "
-                echo -e "Your Encryption Method: ${v2ray_encryption}        "
+                echo -e "Your V2ray System     : ${v2ray_sys}               "
+                echo -e "Your V2ray Arch       : ${v2ray_arc}               "
                 echo -e "               Deploy  Info                        "
                 echo -e "Your MySQL IP         : ${v2ray_mysql_ip_address}  "
                 echo -e "Your MySQL Port       : ${v2ray_mysql_ip_port}     " 
@@ -1311,7 +1326,6 @@ uninstall_v2ray(){
 
             rm -f /etc/init.d/${v2ray_init_name}
             rm -rf /usr/local/${ssrpanel_v2ray_name}
-            rm -rf /usr/local/${v2ray_core_name}
 
             echo "v2ray uninstall success!"
         else
@@ -1340,8 +1354,7 @@ Modify\ time\ zone
 
 # Choose command
 choose_command(){
-    clear
-      
+
     while true
     do
     echo 
@@ -1394,4 +1407,7 @@ choose_command(){
 }
 # start
 cd ${cur_dir}
+
+clear
+
 choose_command
