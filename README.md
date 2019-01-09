@@ -1,7 +1,8 @@
 ### 适用环境
 - Centos6+
 - Debian8+
-- Ubuntu14+
+- Ubuntu16+
+
 
 
 ### 功能
@@ -44,18 +45,18 @@ chmod +x deploy.sh
 
 其他服务命令
 
+centos使用`service`,ubantu使用`/etc/init.d/v2ray`,
+
 SSR
 ```
-service shadowsocksr status
-service shadowsocksr stop
-service shadowsocksr start
+# status start stop
+/etc/init.d/shadowsocksr status
 ```
 
 v2ray
 ```
-service v2ray status
-service v2ray stop
-service v2ray start
+# status start stop
+/etc/init.d/v2ray status
 ```
 
 
