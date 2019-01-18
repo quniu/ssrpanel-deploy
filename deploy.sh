@@ -99,8 +99,8 @@ legendsockssr
 
 # v2ray ciphers
 v2ray_ciphers=(
-auto
 none
+aes-128-cfb
 aes-128-gcm
 chacha20-poly1305
 )
@@ -1048,7 +1048,7 @@ v2ray.tag=proxy
 # 额外ID
 v2ray.alter-id=${v2ray_mysql_alter_id}
 # 用户等级
-v2ray.level=1
+v2ray.level=0
 
 ############################## 节点配置 ##############################
 
@@ -1133,7 +1133,7 @@ config_v2ray(){
   },
   "policy": {
     "levels": {
-      "1": {
+      "0": {
         "statsUserUplink": true,
         "statsUserDownlink": true
       }
@@ -1181,6 +1181,7 @@ v2ray_start_service(){
                 echo -e "Your V2ray Vmess Port : ${v2ray_vmess_port}        "
                 echo -e "Your V2ray System     : ${v2ray_sys}               "
                 echo -e "Your V2ray Arch       : ${v2ray_arc}               "
+                echo -e "Your Encryption Method: ${v2ray_encryption}        "
                 echo -e "               Deploy  Info                        "
                 echo -e "Your MySQL IP         : ${v2ray_mysql_ip_address}  "
                 echo -e "Your MySQL Port       : ${v2ray_mysql_ip_port}     " 
@@ -1246,7 +1247,7 @@ v2ray_firewall_set(){
 }
 
 # Install v2ray
-install_v2ray(){
+install_v2ray_java(){
     if [ -d "/usr/local/${ssrpanel_v2ray_name}" ]; then
         printf "ssrpanel-v2ray has been installed, Do you want to uninstall it? (y/n)"
         printf "\n"
@@ -1254,7 +1255,7 @@ install_v2ray(){
         [ -z ${install_answer} ] && install_answer="y"
         if [ "${install_answer}" == "y" ] || [ "${install_answer}" == "Y" ]; then
             cd ${cur_dir}
-            uninstall_v2ray
+            uninstall_v2ray_java
         else
             echo
             echo "uninstall cancelled, nothing to do..."
@@ -1283,7 +1284,7 @@ v2ray_install_cleanup(){
 }
 
 # Uninstall v2ray
-uninstall_v2ray(){
+uninstall_v2ray_java(){
     printf "Are you sure uninstall v2ray? (y/n)"
     printf "\n"
     read -p "(Default: n):" answer
@@ -1366,10 +1367,10 @@ choose_command(){
         uninstall_shadowsocksr
         ;;
         3)
-        install_v2ray
+        install_v2ray_java
         ;;
         4)
-        uninstall_v2ray
+        uninstall_v2ray_java
         ;;
         5)
         auto_reboot_system
