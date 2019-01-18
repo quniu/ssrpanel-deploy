@@ -21,8 +21,7 @@ RETVAL=0
 
 
 check_running(){
-    python_ver=$(ls /usr/bin|grep -e "^python[23]\.[1-9]\+$"|tail -1)
-    PID=`ps -ef | grep "[0-9] ${python_ver} server\\.py m" | awk '{print $2}'`
+    PID=`ps -ef | grep "[0-9] python server\\.py m" | awk '{print $2}'`
     if [ ! -z "$PID" ]; then
         return 0
     else
@@ -37,10 +36,9 @@ do_start(){
         exit 0
     else
         cd ${BIN}
-        python_ver=$(ls /usr/bin|grep -e "^python[23]\.[1-9]\+$"|tail -1)
-        eval $(ps -ef | grep "[0-9] ${python_ver} server\\.py m" | awk '{print "kill "$2}')
+        eval $(ps -ef | grep "[0-9] python server\\.py m" | awk '{print "kill "$2}')
         ulimit -n 512000
-        nohup ${python_ver} server.py m>> /dev/null 2>&1 &
+        nohup python server.py m>> /dev/null 2>&1 &
         RETVAL=$?
         if [ $RETVAL -eq 0 ]; then
             echo "Starting $NAME success!"
@@ -54,8 +52,7 @@ do_stop(){
     check_running
     if [ $? -eq 0 ]; then
         cd ${BIN}
-        python_ver=$(ls /usr/bin|grep -e "^python[23]\.[1-9]\+$"|tail -1)
-        eval $(ps -ef | grep "[0-9] ${python_ver} server\\.py m" | awk '{print "kill "$2}')
+        eval $(ps -ef | grep "[0-9] python server\\.py m" | awk '{print "kill "$2}')
         RETVAL=$?
         if [ $RETVAL -eq 0 ]; then
             echo "Stopping $NAME success!"
@@ -80,6 +77,7 @@ do_status(){
 
 do_restart(){
     do_stop
+    sleep 0.5
     do_start
 }
 

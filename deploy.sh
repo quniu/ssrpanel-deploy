@@ -31,11 +31,6 @@ v2ray_init_name="v2ray"
 v2ray_service_yum="https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/service/${v2ray_init_name}"
 v2ray_service_apt="https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/service/${v2ray_init_name}-debian"
 
-
-# CyMySQL
-cymysql_file="CyMySQL"
-cymysql_url="https://github.com/nakagami/CyMySQL.git"
-
 # Current folder
 cur_dir=`pwd`
 
@@ -381,12 +376,6 @@ download_files(){
         exit 1
     fi
 
-    # Download cymysql
-    if ! git clone ${cymysql_url}; then
-        echo -e "[${red}Error${plain}] Failed to download cymysql file!"
-        exit 1
-    fi
-
     # Download ShadowsocksR
     if ! git clone ${shadowsocksr_url}; then
         echo -e "[${red}Error${plain}] Failed to download ShadowsocksR file!"
@@ -498,22 +487,6 @@ config_usermysql(){
 EOF
 }
 
-# Install cymysql
-install_cymysql(){
-    cd ${cur_dir}
-    if [ ! -d "/usr/local/${shadowsocksr_name}/cymysql" ]; then
-        git clone ${cymysql_url}
-        mv ${cymysql_file}/cymysql /usr/local/${shadowsocksr_name}
-        echo
-        echo -e "cymysql install completed!"
-        echo
-    else
-        echo "cymysql install failed!"
-        install_cleanup
-        exit 1
-    fi
-}
-
 # Deploy config
 deploy_config(){
     while true
@@ -548,32 +521,32 @@ deploy_config(){
     while true
     do
     #ip
-    echo -e "Please enter the mysql ip address:"
+    echo -e "Please enter the MySQL ip address:"
     read -p "(Default address: 127.0.0.1):" mysql_ip_address
     [ -z "${mysql_ip_address}" ] && mysql_ip_address="127.0.0.1"
     expr ${mysql_ip_address} + 1 &>/dev/null
     #port
-    echo -e "Please enter the mysql port:"
+    echo -e "Please enter the MySQL port:"
     read -p "(Default port: 3306):" mysql_ip_port
     [ -z "${mysql_ip_port}" ] && mysql_ip_port="3306"
     expr ${mysql_ip_port} + 1 &>/dev/null
     #db_name
-    echo -e "Please enter the mysql database name:"
+    echo -e "Please enter the MySQL database name:"
     read -p "(Default name: ssrpanel):" mysql_db_name
     [ -z "${mysql_db_name}" ] && mysql_db_name="ssrpanel"
     expr ${mysql_db_name} + 1 &>/dev/null
     #user_name
-    echo -e "Please enter the mysql user_name:"
+    echo -e "Please enter the MySQL user_name:"
     read -p "(Default user: ssrpanel):" mysql_user_name
     [ -z "${mysql_user_name}" ] && mysql_user_name="ssrpanel"
     expr ${mysql_user_name} + 1 &>/dev/null
     #db_password
-    echo -e "Please enter the mysql database password:"
+    echo -e "Please enter the MySQL database password:"
     read -p "(Default password: password):" mysql_db_password
     [ -z "${mysql_db_password}" ] && mysql_db_password="password"
     expr ${mysql_db_password} + 1 &>/dev/null
     #nodeid
-    echo -e "Please enter the node ID:"
+    echo -e "Please enter the Node ID:"
     read -p "(Default ID: 1):" mysql_nodeid
     [ -z "${mysql_nodeid}" ] && mysql_nodeid="1"
     expr ${mysql_nodeid} + 1 &>/dev/null
@@ -601,10 +574,11 @@ deploy_config(){
     char=`get_char`
     # Install necessary dependencies
     if check_sys packageManager yum; then
-        yum install -y python python-devel python-setuptools openssl openssl-devel curl unzip gcc automake autoconf make libtool wget git
+        yum update -y
+        yum install -y python python-devel python-pip python-setuptools openssl openssl-devel curl unzip gcc automake autoconf make libtool wget git
     elif check_sys packageManager apt; then
         apt-get -y update 
-        apt-get -y install python python-dev python-setuptools openssl libssl-dev curl unzip gcc automake autoconf make libtool wget git
+        apt-get -y install python python-dev python-pip python-setuptools openssl libssl-dev curl unzip gcc automake autoconf make libtool wget git
     fi
     cd ${cur_dir}
 }
@@ -613,6 +587,8 @@ deploy_config(){
 deploy_shadowsocksr(){
     cd ${cur_dir}
     mv ${shadowsocksr_file} /usr/local/${shadowsocksr_name}
+    cd /usr/local/${shadowsocksr_name}
+    pip install -r requestment.txt
     config_userapi
     config_userjson
     config_usermysql
@@ -699,7 +675,6 @@ install_cleanup(){
     rm -rf ${libsodium_file}.tar.gz
     rm -rf ${libsodium_file}
     rm -rf ${shadowsocksr_file}
-    rm -rf ${cymysql_file}
 }
 
 
@@ -726,7 +701,6 @@ install_shadowsocksr(){
         download_files
         install_libsodium
         deploy_shadowsocksr
-        install_cymysql
         if check_sys packageManager yum; then
             firewall_set
         fi
@@ -969,37 +943,37 @@ v2ray_install_prepare(){
     while true
     do
     #ip
-    echo -e "Please enter the mysql ip address:"
+    echo -e "Please enter the MySQL ip address:"
     read -p "(Default address: 127.0.0.1):" v2ray_mysql_ip_address
     [ -z "${v2ray_mysql_ip_address}" ] && v2ray_mysql_ip_address="127.0.0.1"
     expr ${v2ray_mysql_ip_address} + 1 &>/dev/null
     #port
-    echo -e "Please enter the mysql port:"
+    echo -e "Please enter the MySQL port:"
     read -p "(Default port: 3306):" v2ray_mysql_ip_port
     [ -z "${v2ray_mysql_ip_port}" ] && v2ray_mysql_ip_port="3306"
     expr ${v2ray_mysql_ip_port} + 1 &>/dev/null
     #db_name
-    echo -e "Please enter the mysql database name:"
+    echo -e "Please enter the MySQL database name:"
     read -p "(Default name: ssrpanel):" v2ray_mysql_db_name
     [ -z "${v2ray_mysql_db_name}" ] && v2ray_mysql_db_name="ssrpanel"
     expr ${v2ray_mysql_db_name} + 1 &>/dev/null
     #user_name
-    echo -e "Please enter the mysql user_name:"
+    echo -e "Please enter the MySQL user_name:"
     read -p "(Default user: ssrpanel):" v2ray_mysql_user_name
     [ -z "${v2ray_mysql_user_name}" ] && v2ray_mysql_user_name="ssrpanel"
     expr ${v2ray_mysql_user_name} + 1 &>/dev/null
     #db_password
-    echo -e "Please enter the mysql database password:"
+    echo -e "Please enter the MySQL database password:"
     read -p "(Default password: password):" v2ray_mysql_db_password
     [ -z "${v2ray_mysql_db_password}" ] && v2ray_mysql_db_password="password"
     expr ${v2ray_mysql_db_password} + 1 &>/dev/null
     #alter-id
-    echo -e "Please enter the alter-id ID:"
+    echo -e "Please enter the Alter-ID:"
     read -p "(Default ID: 16):" v2ray_mysql_alter_id
     [ -z "${v2ray_mysql_alter_id}" ] && v2ray_mysql_alter_id="16"
     expr ${v2ray_mysql_alter_id} + 1 &>/dev/null
     #nodeid
-    echo -e "Please enter the node ID:"
+    echo -e "Please enter the Node ID:"
     read -p "(Default ID: 1):" v2ray_mysql_nodeid
     [ -z "${v2ray_mysql_nodeid}" ] && v2ray_mysql_nodeid="1"
     expr ${v2ray_mysql_nodeid} + 1 &>/dev/null
@@ -1028,6 +1002,7 @@ v2ray_install_prepare(){
     char=`get_char`
     # Install necessary dependencies
     if check_sys packageManager yum; then
+        yum update -y
         yum install -y python python-devel python-setuptools openssl openssl-devel wget unzip java-1.8.0-openjdk java-1.8.0-openjdk-devel
     elif check_sys packageManager apt; then
         add-apt-repository ppa:openjdk-r/ppa -y 
