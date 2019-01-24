@@ -80,6 +80,30 @@ v2ray
 
 注意：目前v2ray只配置部署`TCP`模式，后期会加上其他模式
 
+### 开启bbr
+
+使用root用户运行以下命令：
+
+```
+wget --no-check-certificate https://github.com/quniu/servertool/raw/master/bbr.sh && chmod +x bbr.sh && ./bbr.sh
+```
+安装完成后，脚本会提示需要重启 VPS，输入 y 并回车后重启。
+
+重启完成后，进入 VPS，验证一下是否成功安装最新内核并开启 TCP BBR，输入以下命令：
+
+```
+uname -r
+```
+查看内核版本，显示为最新版就表示 OK 了
+
+##### 查看是否启动
+
+```
+lsmod | grep bbr
+```
+返回值是tcp_bbr模块，即说明 bbr 已启动。
+
+注意：并不是所有的 VPS 都会有此返回值，若没有也属正常。
 
 ### 建议
 
