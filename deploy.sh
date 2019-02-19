@@ -761,8 +761,8 @@ auto_reboot_system(){
 
     #minute
     echo -e "Please enter the minute now(0-59):"
-    read -p "(Default hour: 20):" auto_minute
-    [ -z "${auto_minute}" ] && auto_minute="20"
+    read -p "(Default hour: 10):" auto_minute
+    [ -z "${auto_minute}" ] && auto_minute="10"
     expr ${auto_minute} + 1 &>/dev/null
 
     echo -e "[${green}Info${plain}] The time has been set, then install crontab!"
