@@ -589,6 +589,7 @@ deploy_shadowsocksr(){
     cd ${cur_dir}
     mv ${shadowsocksr_file} /usr/local/${shadowsocksr_name}
     cd /usr/local/${shadowsocksr_name}
+    pip install --upgrade setuptools
     pip install -r requestment.txt
     config_userapi
     config_userjson
