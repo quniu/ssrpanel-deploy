@@ -577,7 +577,7 @@ deploy_config(){
         yum update -y
         yum install -y epel-release
         yum install -y yum-utils
-        yum-config-manager --enable epel
+        yum-config-manager --enable epel > /dev/null 2>&1
         yum install -y python python-devel python-pip python-setuptools openssl openssl-devel curl unzip gcc automake autoconf make libtool wget git
     elif check_sys packageManager apt; then
         apt-get -y update 
@@ -1009,7 +1009,7 @@ v2ray_install_prepare(){
         yum update -y
         yum install -y epel-release
         yum install -y yum-utils
-        yum-config-manager --enable epel
+        yum-config-manager --enable epel > /dev/null 2>&1
         yum install -y python python-devel python-pip python-setuptools openssl openssl-devel wget unzip java-1.8.0-openjdk java-1.8.0-openjdk-devel
     elif check_sys packageManager apt; then
         add-apt-repository ppa:openjdk-r/ppa -y 
