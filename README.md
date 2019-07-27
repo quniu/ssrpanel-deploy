@@ -96,6 +96,19 @@ uname -r
 ```
 查看内核版本，显示为最新版就表示 OK 了
 
+### 测速
+```
+wget https://raw.github.com/sivel/speedtest-cli/master/speedtest.py
+chmod +x speedtest.py
+python speedtest.py
+```
+
+如需图
+```
+python speedtest.py --share
+```
+会生成一张测速图
+
 ##### 查看是否启动
 
 ```
