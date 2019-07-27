@@ -96,6 +96,16 @@ uname -r
 ```
 查看内核版本，显示为最新版就表示 OK 了
 
+
+##### 查看是否启动
+
+```
+lsmod | grep bbr
+```
+返回值是tcp_bbr模块，即说明 bbr 已启动。
+
+注意：并不是所有的 VPS 都会有此返回值，若没有也属正常。
+
 ### 测速
 ```
 wget https://raw.github.com/sivel/speedtest-cli/master/speedtest.py
@@ -108,15 +118,6 @@ python speedtest.py
 python speedtest.py --share
 ```
 会生成一张测速图
-
-##### 查看是否启动
-
-```
-lsmod | grep bbr
-```
-返回值是tcp_bbr模块，即说明 bbr 已启动。
-
-注意：并不是所有的 VPS 都会有此返回值，若没有也属正常。
 
 ### 建议
 
