@@ -119,6 +119,16 @@ python speedtest.py --share
 ```
 会生成一张测速图
 
+
+### 端口转发
+```
+rm transfer.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/transfer.sh
+chmod +x transfer.sh
+bash -n transfer.sh
+./transfer.sh
+```
+
 ### 建议
 
 先创建节点获取到ID再去部署SSR和v2ray服务，原因如下
