@@ -215,7 +215,7 @@ iptables_set_centos(){
             config_iptables
         fi
 
-        chkconfig --level 2345 iptables on
+        chkconfig iptables on
         set_transfer_rule
 
     elif centosversion 7; then
@@ -261,6 +261,8 @@ set_transfer_rule(){
     # eth0:公网IP
     # eth1:内网IP
 
+
+    # stop 
     service iptables stop
     iptables -L -n > /dev/null 2>&1
 
