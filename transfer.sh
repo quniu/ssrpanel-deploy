@@ -203,8 +203,8 @@ auto_reboot_system(){
 }
 
 
-# Iptables set
-iptables_set_centos(){
+# Iptables Iptables Centos
+iptables_set_yum(){
     echo -e "[${green}Info${plain}] Iptables set start..."
     if centosversion 6; then
         service iptables status > /dev/null 2>&1
@@ -216,7 +216,7 @@ iptables_set_centos(){
         fi
 
         chkconfig iptables on
-        set_transfer_rule
+        set_transfer_rule_yum
 
     elif centosversion 7; then
         systemctl status firewalld > /dev/null 2>&1
@@ -235,18 +235,101 @@ iptables_set_centos(){
         fi
 
         systemctl enable iptables
-        set_transfer_rule
+        set_transfer_rule_yum
 
     fi
     echo -e "[${green}Info${plain}] Transfer Port Set Completed!"
 }
 
-
-# set transfer rule
-set_transfer_rule(){
+# set transfer rule centos
+set_transfer_rule_yum(){
     echo -e "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
     sysctl -p
 
+    # stop 
+    service iptables stop
+    iptables -L -n > /dev/null 2>&1
+
+    # 设置 iptables 规则
+    set_iptables_rule
+
+    service iptables save
+    service iptables restart
+    service iptables status > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo -e "[${green}Info${plain}] iptables restart success!"
+    else
+        echo -e "[${yellow}Warning${plain}] iptables restart fail!"
+    fi
+}
+
+# Iptables Ubuntu/Debian
+iptables_set_apt(){
+    echo -e "[${green}Info${plain}] Iptables set start..."
+    ufw status > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        ufw disable
+    fi
+
+    service iptables status > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo -e "[${yellow}Warning${plain}] iptables looks like shutdown or not installed!"
+        echo -e "[${green}Info${plain}] start to install iptables now"
+        apt-get -y update > /dev/null 2>&1
+        apt-get -y install iptables > /dev/null 2>&1
+    fi
+
+    set_transfer_rule_apt
+
+    echo -e "[${green}Info${plain}] Transfer Port Set Completed!"
+}
+
+# set transfer rule Ubuntu/Debian
+set_transfer_rule_apt(){
+    echo -e "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+    sysctl -p
+
+    # stop 
+    iptables -L -n > /dev/null 2>&1
+
+    # 设置 iptables 规则
+    set_iptables_rule
+
+    if [ ! -f "/etc/iptables.rules" ]; then
+        echo -e "[${green}Info${plain}] create iptables.rules"
+    fi
+
+    sh -c "iptables-save > /etc/iptables.rules" > /dev/null 2>&1
+    echo -e "[${green}Info${plain}] iptables.rules save!"
+
+    # 开机启动加载iptables规则
+    if [ ! -f "/etc/network/if-pre-up.d/iptables" ]; then
+        echo -e "[${green}Info${plain}] iptables up!"
+        echo -e '#!/bin/bash\n/sbin/iptables-restore < /etc/iptables.rules\nexit 0' > /etc/network/if-pre-up.d/iptables
+        chmod +x /etc/network/if-pre-up.d/iptables
+    fi
+
+    if [ ! -f "/etc/network/if-post-down.d/iptables" ]; then
+        echo -e "[${green}Info${plain}] iptables down!"
+        echo -e '#!/bin/bash\n/sbin/iptables-save -c > /etc/iptables.rules\nexit 0' > /etc/network/if-post-down.d/iptables
+        chmod +x /etc/network/if-post-down.d/iptables
+    fi
+
+    systemctl --version > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo -e '[Unit]\nDescription = Apply iptables rules\n\n[Service]\nType=oneshot\nExecStart=/etc/network/if-pre-up.d/iptables\n\n[Install]\nWantedBy=network-pre.target'> /etc/systemd/system/iptables-rules.service
+        systemctl enable iptables-rules.service
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo -e "[${green}Info${plain}] iptables restart success!"
+    else
+        echo -e "[${yellow}Warning${plain}] iptables restart fail!"
+    fi
+}
+
+# iptables rule
+set_iptables_rule(){
     # ${ip_this_server}            // 中转服务器ip
     # ${ip_transfer_server}        // 被中转服务器ip
 
@@ -257,14 +340,9 @@ set_transfer_rule(){
     # ${ip_start_turned_port}      // 被中转服务器的开始端口（多端口）
     # ${ip_end_port}               // 中转服务器的结束端口（多端口）
     # ${ip_end_turned_port}        // 被中转服务器的结束端口（多端口）
-
+ 
     # eth0:公网IP
     # eth1:内网IP
-
-
-    # stop 
-    service iptables stop
-    iptables -L -n > /dev/null 2>&1
 
     if [ "${port_type_select}" == 1 ]; then
         # 单端口
@@ -303,15 +381,6 @@ set_transfer_rule(){
         iptables -t nat -I PREROUTING -p udp --dport ${ip_start_turned_port}:${ip_end_turned_port} -j DNAT --to ${ip_transfer_server}
         iptables -t nat -I POSTROUTING -p udp --dport ${ip_start_turned_port}:${ip_end_turned_port} -j MASQUERADE
     fi
-
-    service iptables save
-    service iptables restart
-    service iptables status > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo -e "[${green}Info${plain}] iptables restart success!"
-    else
-        echo -e "[${yellow}Warning${plain}] iptables restart fail!"
-    fi
 }
 
 
@@ -326,7 +395,7 @@ EOF
 set_iptables_transfer(){
     while true
     do
-    echo -e "Please select the Port Type:"
+    echo -e "[${green}Info${plain}] Transfer Port Type"
     for ((i=1;i<=${#portType[@]};i++ )); do
         hint="${portType[$i-1]}"
         echo -e "${green}${i} => ${plain} ${hint}"
@@ -431,9 +500,10 @@ set_iptables_transfer(){
 
     if check_sys packageManager yum; then
         echo -e "[${green}Info${plain}] OK! packageManager yum"
-        iptables_set_centos
+        iptables_set_yum
     elif check_sys packageManager apt; then
         echo -e "[${green}Info${plain}] OK! packageManager apt"
+        iptables_set_apt
     fi
 }
 
@@ -447,6 +517,16 @@ Modify\ Time\ Zone
 
 # Choose command
 choose_command(){
+    if check_sys packageManager yum || check_sys packageManager apt; then
+        # Not support CentOS 5
+        if centosversion 5; then
+            echo -e "$[{red}Error${plain}] Not supported CentOS 5, please change to CentOS 6+/Debian 7+/Ubuntu 12+ and try again!"
+            exit 1
+        fi
+    else
+        echo -e "[${red}Error${plain}] Your OS is not supported. please change OS to CentOS/Debian/Ubuntu and try again!"
+        exit 1
+    fi
 
     while true
     do
