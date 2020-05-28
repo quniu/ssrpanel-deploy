@@ -38,6 +38,10 @@ chmod +x deploy.sh
 
 安装的版本均是最新版本
 
+### 编辑配置
+- 编辑数据库 `vi /usr/local/shadowsocksr/usermysql.json`
+- 编辑ss `vi /usr/local/shadowsocksr/user-config.json`
+
 
 ### 查看shadowsocksr服务
 

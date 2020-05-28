@@ -15,8 +15,8 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
 # libsodium
-libsodium_file="libsodium-1.0.16"
-libsodium_url="https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz"
+libsodium_file="libsodium-1.0.18"
+libsodium_url="https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz"
 
 # shadowsocksr
 shadowsocksr_name="shadowsocksr"
@@ -47,12 +47,17 @@ aes-256-ctr
 aes-192-ctr
 aes-128-ctr
 chacha20-ietf
+chacha20-ietf-poly1305
+aes-256-gcm
+aes-192-gcm
+aes-128-gcm
 chacha20
 salsa20
 xchacha20
 xsalsa20
 rc4-md5
 )
+
 # Reference URL:
 # https://github.com/shadowsocksr-rm/shadowsocks-rss/blob/master/ssr.md
 # https://github.com/shadowsocksrr/shadowsocksr/commit/a3cf0254508992b7126ab1151df0c2f10bf82680
@@ -536,7 +541,7 @@ deploy_config(){
     [ -z "${mysql_db_name}" ] && mysql_db_name="ssrpanel"
     expr ${mysql_db_name} + 1 &>/dev/null
     #user_name
-    echo -e "Please enter the MySQL user_name:"
+    echo -e "Please enter the MySQL database user_name:"
     read -p "(Default user: ssrpanel):" mysql_user_name
     [ -z "${mysql_user_name}" ] && mysql_user_name="ssrpanel"
     expr ${mysql_user_name} + 1 &>/dev/null
