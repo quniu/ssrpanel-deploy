@@ -16,7 +16,7 @@ export PATH
 
 # libsodium
 libsodium_file="libsodium-1.0.18"
-libsodium_url="https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz"
+libsodium_url="https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz"
 
 # shadowsocksr
 shadowsocksr_name="shadowsocksr"
