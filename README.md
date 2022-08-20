@@ -13,20 +13,9 @@
 - 设置定时重启服务器
 - 时区校正`Asia/Shanghai`
 
-### 安装wget
-```
-# Centos
-yum -y install wget
-
-# Ubuntu，Debian
-apt-get -y install wget
-```
-
 ### 执行脚本
 ```
-wget -N --no-check-certificate https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/deploy.sh
-chmod +x deploy.sh
-./deploy.sh
+bash <(curl -Ls https://raw.githubusercontent.com/quniu/ssrpanel-deploy/master/deploy.sh)
 ```
 
 ### 说明

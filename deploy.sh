@@ -1015,11 +1015,11 @@ v2ray_install_prepare(){
         yum install -y epel-release
         yum install -y yum-utils
         yum-config-manager --enable epel > /dev/null 2>&1
-        yum install -y python python-devel python-pip python-setuptools openssl openssl-devel wget unzip java-1.8.0-openjdk java-1.8.0-openjdk-devel
+        yum install -y git python python-devel python-pip python-setuptools openssl openssl-devel wget unzip java-1.8.0-openjdk java-1.8.0-openjdk-devel
     elif check_sys packageManager apt; then
         add-apt-repository ppa:openjdk-r/ppa -y 
         apt-get -y update 
-        apt-get -y install python python-dev python-pip python-setuptools openssl libssl-dev wget unzip openjdk-8-jdk
+        apt-get -y install git python python-dev python-pip python-setuptools openssl libssl-dev wget unzip openjdk-8-jdk
     fi
     cd ${cur_dir} 
 }
